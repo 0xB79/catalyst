@@ -43,7 +43,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            livepeerci/catalyst
+            0xb79orch/catalyst
             ghcr.io/${{ github.repository }}
           tags: |
             type=ref,event=branch
