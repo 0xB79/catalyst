@@ -33,9 +33,9 @@ func main() {
 	verbosity := fs.String("v", "", "Log verbosity.  {4|5|6}")
 	fs.StringVar(&cli.Mode, "mode", "", "Allowed options: local, api, mainnet")
 	fs.StringVar(&cli.APIKey, "apiKey", "", "With --mode=api, which Livepeer.com API key should you use?")
-	fs.StringVar(&cli.OrchAddr, "orchAddr", "", "With --mode=mainnet, the Ethereum address of a hardcoded orchestrator")
-	fs.StringVar(&cli.EthURL, "ethUrl", "", "Address of an Arbitrum Mainnet HTTP-RPC node")
-	fs.StringVar(&cli.EthPassword, "ethPassword", "", "With --mode=mainnet, password for mounted Ethereum wallet. Will be prompted if not provided.")
+	fs.StringVar(&cli.OrchAddr, "orchAddr", "", "With --mode=mainnet or --mode=rinkeby, the Ethereum address of a hardcoded orchestrator")
+	fs.StringVar(&cli.EthURL, "ethUrl", "", "Address of an Arbitrum Mainnet or Rinkeby HTTP-RPC node")
+	fs.StringVar(&cli.EthPassword, "ethPassword", "", "With --mode=mainnet or --mode=rinkeby, password for mounted Ethereum wallet. Will be prompted if not provided.")
 	fs.StringVar(&cli.DataDir, "dataDir", "/etc/livepeer", "Directory within the container to save settings")
 
 	ff.Parse(
@@ -66,12 +66,12 @@ func ensureConfigFile(cli CLI) (string, error) {
 
 	confPath := fmt.Sprintf("%s/catalyst.json", cli.DataDir)
 
-	if cli.Mode == "mainnet" && cli.EthURL == "" {
-		return "", fmt.Errorf("--ethUrl is required with --mode=mainnet")
+	if (cli.Mode == "mainnet" || cli.Mode == "rinkeby") && cli.EthURL == "" {
+		return "", fmt.Errorf("--ethUrl is required with --mode=mainnet and --mode=rinkeby")
 	}
 
-	if cli.Mode == "mainnet" && cli.EthPassword == "" {
-		keystoreExists := utils.IsFileExists(cli.DataDir + "/mainnet-broadcaster/keystore")
+	if (cli.Mode == "mainnet" || cli.Mode == "rinkeby") && cli.EthPassword == "" {
+		keystoreExists := utils.IsFileExists(cli.DataDir + fmt.Sprintf("/%s-broadcaster/keystore", cli.Mode))
 		if !keystoreExists {
 			glog.Infof("No Ethereum account detected, creating new account.")
 		}
